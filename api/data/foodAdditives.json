@@ -1,0 +1,479 @@
+{
+  "_meta": {
+    "purpose": "Curated grounding dataset for Ingredient Intel. Used to verify food/beverage additive claims against official regulatory bodies instead of relying purely on LLM recall.",
+    "coverage": "Starter seed set (~28 of the most commonly seen food additives). Not exhaustive — extend as needed.",
+    "lastCompiled": "2026-06-28",
+    "disclaimer": "Compiled from publicly available regulatory sources (JECFA/WHO-FAO, EFSA/EU, US FDA, FSSAI India, IARC/WHO). Regulatory status can change — verify against the primary source link before relying on this for anything beyond a hackathon/demo context. ADI values are approximate and rounded from primary sources.",
+    "bodies": {
+      "JECFA": "Joint FAO/WHO Expert Committee on Food Additives — sets international Acceptable Daily Intake (ADI) values",
+      "EFSA_EU": "European Food Safety Authority / EU Regulation (EC) No 1333/2008 on food additives",
+      "FDA": "US Food and Drug Administration — 21 CFR food additive / GRAS regulations",
+      "FSSAI": "Food Safety and Standards Authority of India — FSS (Food Products Standards and Food Additives) Regulations, 2011",
+      "IARC": "International Agency for Research on Cancer (WHO) — carcinogen hazard classification, Groups 1 / 2A / 2B / 3"
+    }
+  },
+  "additives": [
+    {
+      "id": "e211",
+      "displayName": "Sodium Benzoate",
+      "aliases": ["sodium benzoate", "benzoate of soda", "e211", "e 211", "ins 211"],
+      "eNumber": "E211",
+      "casNumber": "532-32-1",
+      "category": "Preservative",
+      "regulatory": {
+        "JECFA": "ADI established, approx. 0–5 mg/kg body weight/day (as benzoic acid)",
+        "EFSA_EU": "Approved under Reg. (EC) 1333/2008; re-evaluated by EFSA (2016), approval maintained with usage limits",
+        "FDA": "GRAS / approved food additive, 21 CFR 184.1733",
+        "FSSAI": "Permitted preservative with category-specific maximum limits under FSS (Food Products Standards and Food Additives) Regulations, 2011",
+        "IARC": null
+      },
+      "knownConcerns": "Can react with ascorbic acid (vitamin C) under heat, light, or storage to form trace benzene — mainly relevant in soft drinks combining the two. Regulators continue to permit it at approved levels.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [
+        {"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"},
+        {"body": "FDA", "url": "https://www.fda.gov/food/food-additives-petitions/substances-added-food-formerly-eafus"}
+      ]
+    },
+    {
+      "id": "e202",
+      "displayName": "Potassium Sorbate",
+      "aliases": ["potassium sorbate", "e202", "ins 202"],
+      "eNumber": "E202",
+      "casNumber": "24634-61-5",
+      "category": "Preservative",
+      "regulatory": {
+        "JECFA": "ADI 'not specified' (i.e. no safety concern at typical use levels)",
+        "EFSA_EU": "Approved, Reg. (EC) 1333/2008",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted preservative",
+        "IARC": null
+      },
+      "knownConcerns": "Generally regarded as one of the milder preservatives; rare contact sensitivity reported in cosmetics use.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e330",
+      "displayName": "Citric Acid",
+      "aliases": ["citric acid", "e330", "ins 330"],
+      "eNumber": "E330",
+      "casNumber": "77-92-9",
+      "category": "Acidity Regulator",
+      "regulatory": {
+        "JECFA": "ADI 'not specified' (no safety concern at normal dietary levels)",
+        "EFSA_EU": "Approved, widely used",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted acidity regulator",
+        "IARC": null
+      },
+      "knownConcerns": "Naturally occurring in citrus fruit; can contribute to dental enamel erosion in high-acid beverages, but not a toxicological concern.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "FDA", "url": "https://www.fda.gov/food/food-additives-petitions/substances-added-food-formerly-eafus"}]
+    },
+    {
+      "id": "e250-e251",
+      "displayName": "Sodium Nitrite / Sodium Nitrate",
+      "aliases": ["sodium nitrite", "sodium nitrate", "e250", "e251", "ins 250", "ins 251"],
+      "eNumber": "E250 / E251",
+      "casNumber": "7632-00-0 / 7631-99-4",
+      "category": "Preservative (curing agent)",
+      "regulatory": {
+        "JECFA": "ADI established, approx. 0–0.07 mg/kg bw/day (nitrite)",
+        "EFSA_EU": "Approved only for specific cured-meat categories with strict maximum residual limits",
+        "FDA": "Approved for meat curing under USDA/FDA rules, with maximum permitted levels",
+        "FSSAI": "Permitted in cured/processed meat categories only, with limits",
+        "IARC": "Processed meat (the product category, not the additive itself) is IARC Group 1; nitrite/nitrate compounds themselves are not separately classified by IARC"
+      },
+      "knownConcerns": "Can form N-nitroso compounds (some carcinogenic) when combined with amines, especially under high-heat cooking. This is the primary driver behind IARC's classification of processed meat as Group 1 (carcinogenic to humans) as a category.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "IARC", "url": "https://www.iarc.who.int/"}]
+    },
+    {
+      "id": "e621",
+      "displayName": "Monosodium Glutamate (MSG)",
+      "aliases": ["monosodium glutamate", "msg", "e621", "ins 621"],
+      "eNumber": "E621",
+      "casNumber": "142-47-0",
+      "category": "Flavour Enhancer",
+      "regulatory": {
+        "JECFA": "ADI 'not specified' — JECFA has repeatedly found no safety concern at normal dietary intake",
+        "EFSA_EU": "Approved; EFSA re-evaluation (2017) maintained approval with a group ADI for glutamates",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted flavour enhancer",
+        "IARC": null
+      },
+      "knownConcerns": "Long-rumored 'MSG symptom complex' (headache, flushing) has not been substantiated in controlled studies; major food-safety bodies consider it safe for the general population at typical intake.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e951",
+      "displayName": "Aspartame",
+      "aliases": ["aspartame", "e951", "ins 951"],
+      "eNumber": "E951",
+      "casNumber": "22839-47-0",
+      "category": "Sweetener",
+      "regulatory": {
+        "JECFA": "ADI reaffirmed July 2023 at 0–40 mg/kg bw/day; JECFA concluded no convincing evidence of adverse effects at this intake",
+        "EFSA_EU": "Approved, ADI 40 mg/kg bw/day",
+        "FDA": "Approved food additive, ADI 50 mg/kg bw/day (US figure differs slightly from JECFA/EFSA)",
+        "FSSAI": "Permitted sweetener with labelling requirements",
+        "IARC": "Classified Group 2B — 'possibly carcinogenic to humans' (July 2023), based on what IARC itself described as limited evidence"
+      },
+      "knownConcerns": "This is the textbook case of 'hazard vs. risk': IARC's 2B hazard classification (limited evidence) was issued the same week JECFA reaffirmed the ADI is unchanged — i.e. the risk assessors did not lower the safe-intake limit. A 70kg adult would need ~9-14 cans of diet soda/day to exceed the ADI.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [
+        {"body": "IARC/WHO", "url": "https://www.iarc.who.int/news-events/aspartame-hazard-and-risk-assessment-results-released/"},
+        {"body": "WHO/JECFA joint statement", "url": "https://www.who.int/news/item/14-07-2023-aspartame-hazard-and-risk-assessment-results-released"}
+      ]
+    },
+    {
+      "id": "e950",
+      "displayName": "Acesulfame Potassium (Ace-K)",
+      "aliases": ["acesulfame potassium", "acesulfame k", "e950", "ins 950"],
+      "eNumber": "E950",
+      "casNumber": "55589-62-3",
+      "category": "Sweetener",
+      "regulatory": {
+        "JECFA": "ADI 0–15 mg/kg bw/day",
+        "EFSA_EU": "Approved",
+        "FDA": "Approved",
+        "FSSAI": "Permitted sweetener with labelling requirements",
+        "IARC": null
+      },
+      "knownConcerns": "No established human carcinogenicity or toxicity concern at approved levels; not metabolised by the body and excreted unchanged.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e955",
+      "displayName": "Sucralose",
+      "aliases": ["sucralose", "e955", "ins 955"],
+      "eNumber": "E955",
+      "casNumber": "56038-13-2",
+      "category": "Sweetener",
+      "regulatory": {
+        "JECFA": "ADI 0–15 mg/kg bw/day",
+        "EFSA_EU": "Approved",
+        "FDA": "Approved",
+        "FSSAI": "Permitted sweetener with labelling requirements",
+        "IARC": null
+      },
+      "knownConcerns": "Largely passes through the body unmetabolised; some emerging research on gut-microbiome effects at high intakes is still being evaluated, not yet a basis for regulatory action.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e954",
+      "displayName": "Saccharin",
+      "aliases": ["saccharin", "sodium saccharin", "e954", "ins 954"],
+      "eNumber": "E954",
+      "casNumber": "81-07-2",
+      "category": "Sweetener",
+      "regulatory": {
+        "JECFA": "ADI 0–5 mg/kg bw/day",
+        "EFSA_EU": "Approved",
+        "FDA": "Approved (removed from US carcinogen list in 2000 after review of rat-specific mechanism)",
+        "FSSAI": "Permitted sweetener with labelling requirements",
+        "IARC": "Previously listed, but delisted from IARC carcinogen classifications after mechanism shown to be rat-specific and not relevant to humans"
+      },
+      "knownConcerns": "Historical bladder-tumor link in rats was later shown to be due to a rat-specific urinary mechanism not applicable to humans; major agencies now consider it safe within ADI.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FDA", "url": "https://www.fda.gov/food/food-additives-petitions/substances-added-food-formerly-eafus"}]
+    },
+    {
+      "id": "e171",
+      "displayName": "Titanium Dioxide",
+      "aliases": ["titanium dioxide", "tio2", "e171", "ins 171"],
+      "eNumber": "E171",
+      "casNumber": "13463-67-7",
+      "category": "Colour (whitener)",
+      "regulatory": {
+        "JECFA": "Previously had no ADI limitation; under continued review",
+        "EFSA_EU": "BANNED as a food additive across the EU since 7 August 2022 (Regulation (EU) 2022/63) — EFSA could not rule out genotoxicity concerns and could not confirm an ADI",
+        "FDA": "Still an approved color additive in US food as of early 2026; a 2023 citizen petition asking FDA to revoke this is pending, no ban issued",
+        "FSSAI": "Permitted in India as of current FSSAI rules — not aligned with the EU ban",
+        "IARC": "Powder form previously classified by EU/ECHA as a suspected inhalation carcinogen (Category 2); an EU Court of Justice ruling (Aug 2025) overturned that specific classification"
+      },
+      "knownConcerns": "This is a genuinely split-jurisdiction case: banned in EU food, still permitted in the US and India. Good example for your app to show 'this ingredient's status literally depends on which country's rules you apply.'",
+      "flagBaseline": "yellow",
+      "sourceLinks": [
+        {"body": "European Commission (DG SANTE)", "url": "https://ec.europa.eu/newsroom/sante/items/732079/en"},
+        {"body": "FDA color additive status", "url": "https://www.fda.gov/industry/color-additives/fdc-red-no-3"}
+      ]
+    },
+    {
+      "id": "e127-red3",
+      "displayName": "Erythrosine / FD&C Red No. 3 (Red Dye 3)",
+      "aliases": ["erythrosine", "red dye 3", "red dye no. 3", "fd&c red no. 3", "red 3", "e127", "ins 127"],
+      "eNumber": "E127",
+      "casNumber": "16423-68-0",
+      "category": "Colour",
+      "regulatory": {
+        "JECFA": "Evaluated; ADI previously established but use is now restricted/banned in major markets",
+        "EFSA_EU": "Already banned for food use in the EU, except limited use in certain cherries",
+        "FDA": "BANNED in US food and ingested drugs as of FDA order dated 15 Jan 2025 (Delaney Clause — found to cause cancer in male rats); food manufacturers have until 15 Jan 2027 to reformulate. Was already banned in US cosmetics since 1990",
+        "FSSAI": "Status varies; check current FSSAI colour-additive list for India-specific permission",
+        "IARC": null
+      },
+      "knownConcerns": "FDA was explicit that the cancer mechanism seen in male rats (thyroid tumors via a hormone pathway) has not been observed in humans — the ban was triggered by the Delaney Clause's strict 'any carcinogen in animals' rule, not by direct human evidence.",
+      "flagBaseline": "red",
+      "sourceLinks": [
+        {"body": "FDA", "url": "https://www.fda.gov/industry/color-additives/fdc-red-no-3"},
+        {"body": "FDA order", "url": "https://www.fda.gov/food/hfp-constituent-updates/fda-revoke-authorization-use-red-no-3-food-and-ingested-drugs"}
+      ]
+    },
+    {
+      "id": "e129-red40",
+      "displayName": "Allura Red AC (Red 40)",
+      "aliases": ["allura red", "red 40", "red dye 40", "e129", "ins 129"],
+      "eNumber": "E129",
+      "casNumber": "25956-17-6",
+      "category": "Colour",
+      "regulatory": {
+        "JECFA": "ADI 0–7 mg/kg bw/day",
+        "EFSA_EU": "Approved, but EU requires a warning label ('may have an adverse effect on activity and attention in children') under Reg. 1333/2008 Annex V",
+        "FDA": "Currently approved; included in HHS/FDA's June 2025 announced plan to phase out petroleum-based synthetic dyes by Oct 2027 (not yet banned as of early 2026)",
+        "FSSAI": "Permitted colour with usage limits",
+        "IARC": null
+      },
+      "knownConcerns": "Most widely used synthetic food dye in the US; associated in some studies with hyperactivity/attention effects in sensitive children (evidence is mixed) — this is the basis of the EU mandatory warning label.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FDA dye phase-out announcement", "url": "https://www.fda.gov/food/food-ingredients-packaging/fda-encourages-food-manufacturers-accelerate-phasing-out-use-fdc-red-no-3-foods-2027-deadline"}]
+    },
+    {
+      "id": "e102",
+      "displayName": "Tartrazine (Yellow 5)",
+      "aliases": ["tartrazine", "yellow 5", "yellow no. 5", "e102", "ins 102"],
+      "eNumber": "E102",
+      "casNumber": "1934-21-0",
+      "category": "Colour",
+      "regulatory": {
+        "JECFA": "ADI 0–7.5 mg/kg bw/day",
+        "EFSA_EU": "Approved, with mandatory 'may have an adverse effect on activity and attention in children' warning label",
+        "FDA": "Currently approved; part of FDA/HHS's 2025-announced phase-out plan (target Oct 2027)",
+        "FSSAI": "Permitted colour with usage limits",
+        "IARC": null
+      },
+      "knownConcerns": "Known allergen/intolerance trigger in a small subset of people, especially those with aspirin sensitivity; linked in some studies to hyperactivity in children.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FDA dye phase-out announcement", "url": "https://www.fda.gov/food/food-ingredients-packaging/fda-encourages-food-manufacturers-accelerate-phasing-out-use-fdc-red-no-3-foods-2027-deadline"}]
+    },
+    {
+      "id": "e319-321",
+      "displayName": "BHA / BHT (Butylated Hydroxyanisole / Toluene)",
+      "aliases": ["bha", "bht", "butylated hydroxyanisole", "butylated hydroxytoluene", "e320", "e321"],
+      "eNumber": "E320 (BHA) / E321 (BHT)",
+      "casNumber": "25013-16-5 / 128-37-0",
+      "category": "Antioxidant / Preservative",
+      "regulatory": {
+        "JECFA": "ADI approx. 0–0.3 mg/kg bw/day for BHA; similar order for BHT",
+        "EFSA_EU": "Approved with usage limits; under periodic re-evaluation",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted antioxidant with limits",
+        "IARC": "BHA classified IARC Group 2B ('possibly carcinogenic to humans'); BHT not classified by IARC"
+      },
+      "knownConcerns": "BHA's 2B classification is based on animal studies (forestomach tumors in rodents, an organ humans don't have an exact equivalent of) — regulators have kept it approved at current use levels, but several manufacturers have voluntarily phased it out.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e924",
+      "displayName": "Potassium Bromate",
+      "aliases": ["potassium bromate", "e924", "ins 924"],
+      "eNumber": "E924",
+      "casNumber": "7758-01-2",
+      "category": "Flour treatment agent",
+      "regulatory": {
+        "JECFA": "Could not establish an ADI due to genotoxicity/carcinogenicity concerns",
+        "EFSA_EU": "BANNED as a food additive in the EU/UK",
+        "FDA": "Still technically permitted in the US (most large bakeries voluntarily stopped using it); California's Food Safety Act bans it from 1 Jan 2027",
+        "FSSAI": "BANNED in India as a flour treatment agent (FSSAI notification, 2016) on cancer-risk grounds",
+        "IARC": "Classified IARC Group 2B ('possibly carcinogenic to humans')"
+      },
+      "knownConcerns": "Genuinely contested across jurisdictions: banned outright in the EU, UK, Canada, Brazil and India, but not federally banned in the US (California is the first US state to ban it, effective 2027).",
+      "flagBaseline": "red",
+      "sourceLinks": [{"body": "FSSAI ban notification context", "url": "https://fssai.gov.in/"}]
+    },
+    {
+      "id": "e407",
+      "displayName": "Carrageenan",
+      "aliases": ["carrageenan", "e407", "ins 407"],
+      "eNumber": "E407",
+      "casNumber": "9000-07-1",
+      "category": "Thickener / Stabiliser",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted thickener/stabiliser",
+        "IARC": null
+      },
+      "knownConcerns": "Derived from red seaweed. Some animal/in-vitro studies link degraded carrageenan (poligeenan, a different substance not used in food) to gut inflammation; food-grade carrageenan itself has not been shown to cause this in regulatory reviews, though it remains a topic of ongoing research and some consumer concern.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "hfcs",
+      "displayName": "High-Fructose Corn Syrup",
+      "aliases": ["high fructose corn syrup", "hfcs", "high-fructose corn syrup", "corn syrup solids"],
+      "eNumber": null,
+      "casNumber": null,
+      "category": "Sweetener",
+      "regulatory": {
+        "JECFA": "Not a single defined additive (a sugar mixture); not subject to ADI",
+        "EFSA_EU": "No specific additive restriction — regulated as a food/sugar ingredient, not a food additive",
+        "FDA": "GRAS as a sugar ingredient",
+        "FSSAI": "No specific additive restriction — regulated under sugar/sweetener standards",
+        "IARC": null
+      },
+      "knownConcerns": "Not regulated as an 'additive' with a safety limit because it's a caloric sugar, not a functional additive — the health debate (excess fructose, metabolic effects) is a nutrition/dietary-pattern issue, not a food-safety/toxicology one, and should be framed that way rather than as an 'unsafe additive'.",
+      "flagBaseline": "yellow",
+      "sourceLinks": []
+    },
+    {
+      "id": "phvo",
+      "displayName": "Partially Hydrogenated Oils (Trans Fat source)",
+      "aliases": ["partially hydrogenated oil", "partially hydrogenated vegetable oil", "trans fat", "hydrogenated vegetable oil"],
+      "eNumber": null,
+      "casNumber": null,
+      "category": "Fat / Oil",
+      "regulatory": {
+        "JECFA": "WHO has called for global elimination of industrially-produced trans fat by 2023 target (REPLACE initiative)",
+        "EFSA_EU": "Industrial trans fat capped at 2g per 100g of fat EU-wide since April 2021 (Regulation (EU) 2019/649)",
+        "FDA": "Partially hydrogenated oils are NO LONGER 'Generally Recognized as Safe' in the US — FDA revoked GRAS status, final compliance June 2018",
+        "FSSAI": "Trans-fat content in food capped at 2% by FSSAI regulation (phased in through 2022)",
+        "IARC": null
+      },
+      "knownConcerns": "One of the few ingredients with near-universal regulatory consensus against it — strongly linked to cardiovascular disease risk. If you see this on a label, it's a legitimate red flag almost everywhere.",
+      "flagBaseline": "red",
+      "sourceLinks": [{"body": "FDA trans fat ruling", "url": "https://www.fda.gov/food/food-additives-petitions/trans-fat"}]
+    },
+    {
+      "id": "e220-228",
+      "displayName": "Sulfites (Sulphur Dioxide and Sulfites)",
+      "aliases": ["sulfites", "sulphites", "sulfur dioxide", "sodium sulfite", "sodium bisulfite", "potassium metabisulfite", "e220", "e221", "e222", "e223", "e224", "e228"],
+      "eNumber": "E220–E228",
+      "casNumber": "7446-09-5 (sulphur dioxide)",
+      "category": "Preservative / Antioxidant",
+      "regulatory": {
+        "JECFA": "ADI 0–0.7 mg/kg bw/day (as sulphur dioxide)",
+        "EFSA_EU": "Approved with limits; mandatory allergen labelling above 10mg/kg or 10mg/L",
+        "FDA": "Approved; mandatory allergen labelling above 10ppm",
+        "FSSAI": "Permitted with limits and labelling requirements",
+        "IARC": null
+      },
+      "knownConcerns": "Recognized allergen — can trigger asthma/anaphylaxis-like reactions in sulfite-sensitive individuals. This is a labelling/allergen issue more than a general-population toxicity issue.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FSSAI", "url": "https://fssai.gov.in/cms/Compendium-FSS-FPS-FA.php"}]
+    },
+    {
+      "id": "e322",
+      "displayName": "Lecithin (Soy / Sunflower)",
+      "aliases": ["lecithin", "soy lecithin", "sunflower lecithin", "e322", "ins 322"],
+      "eNumber": "E322",
+      "casNumber": "8002-43-5",
+      "category": "Emulsifier",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted emulsifier",
+        "IARC": null
+      },
+      "knownConcerns": "Naturally derived (commonly from soy or sunflower); relevant mainly for soy-allergy labelling, not a general safety concern.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    },
+    {
+      "id": "e471",
+      "displayName": "Mono- and Diglycerides of Fatty Acids",
+      "aliases": ["mono- and diglycerides", "monoglycerides", "diglycerides", "e471", "ins 471"],
+      "eNumber": "E471",
+      "casNumber": "97593-29-8",
+      "category": "Emulsifier",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted emulsifier",
+        "IARC": null
+      },
+      "knownConcerns": "Generally considered low-risk; may be derived from animal or plant fat sources, relevant for vegetarian/vegan and religious dietary flags rather than toxicology.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    },
+    {
+      "id": "e627-631",
+      "displayName": "Disodium Guanylate / Disodium Inosinate",
+      "aliases": ["disodium guanylate", "disodium inosinate", "e627", "e631", "ins 627", "ins 631"],
+      "eNumber": "E627 / E631",
+      "casNumber": "5550-12-7 / 4691-65-0",
+      "category": "Flavour Enhancer",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted flavour enhancer",
+        "IARC": null
+      },
+      "knownConcerns": "Often used alongside MSG to amplify umami; not linked to any established toxicity concern at normal dietary levels, but a relevant flag for people who specifically avoid glutamate/nucleotide flavour enhancers.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    },
+    {
+      "id": "e412",
+      "displayName": "Guar Gum",
+      "aliases": ["guar gum", "e412", "ins 412"],
+      "eNumber": "E412",
+      "casNumber": "9000-30-0",
+      "category": "Thickener / Stabiliser",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted thickener",
+        "IARC": null
+      },
+      "knownConcerns": "Naturally derived from guar beans; generally well-tolerated, though high intakes can have a laxative/bloating effect in sensitive individuals.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    },
+    {
+      "id": "e160a",
+      "displayName": "Beta-Carotene",
+      "aliases": ["beta-carotene", "beta carotene", "e160a", "ins 160a"],
+      "eNumber": "E160a",
+      "casNumber": "7235-40-7",
+      "category": "Colour (natural)",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "Approved / exempt from certification",
+        "FSSAI": "Permitted natural colour",
+        "IARC": null
+      },
+      "knownConcerns": "Naturally occurring pro-vitamin A pigment; no meaningful safety concern at food-use levels.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    },
+    {
+      "id": "e300",
+      "displayName": "Ascorbic Acid (Vitamin C)",
+      "aliases": ["ascorbic acid", "vitamin c", "e300", "ins 300"],
+      "eNumber": "E300",
+      "casNumber": "50-81-7",
+      "category": "Antioxidant",
+      "regulatory": {
+        "JECFA": "ADI 'not specified'",
+        "EFSA_EU": "Approved",
+        "FDA": "GRAS",
+        "FSSAI": "Permitted antioxidant",
+        "IARC": null
+      },
+      "knownConcerns": "A nutrient as well as an additive; only relevant flag is the benzene-formation interaction with sodium benzoate (E211) noted above, not a concern on its own.",
+      "flagBaseline": "green",
+      "sourceLinks": []
+    }
+  ]
+}
