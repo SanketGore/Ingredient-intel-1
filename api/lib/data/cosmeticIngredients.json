@@ -1,0 +1,240 @@
+{
+  "_meta": {
+    "purpose": "Curated grounding dataset for Ingredient Intel. Used to verify cosmetic/skincare ingredient claims against official regulatory bodies instead of relying purely on LLM recall.",
+    "coverage": "Starter seed set (~14 of the most commonly flagged cosmetic ingredients). Not exhaustive — extend as needed.",
+    "lastCompiled": "2026-06-28",
+    "disclaimer": "Compiled from publicly available regulatory sources (EU CosIng/SCCS, US FDA, India CDSCO/BIS). Regulatory status and concentration limits can change — verify against the primary source link before relying on this beyond a hackathon/demo context.",
+    "bodies": {
+      "EU_CosIng": "European Commission CosIng database, governed by Cosmetics Regulation (EC) No 1223/2009 and its Annexes",
+      "SCCS": "EU Scientific Committee on Consumer Safety — issues the scientific opinions CosIng decisions are based on",
+      "FDA": "US Food and Drug Administration — cosmetic ingredient authority (cosmetics are not pre-approved in the US the way they are in the EU, except color additives)",
+      "India_CDSCO_BIS": "India's Central Drugs Standard Control Organisation (Cosmetics Rules, 2020) and Bureau of Indian Standards IS 4707 Part 1 (restricted substances) / Part 2 (permitted preservatives, UV filters, antioxidants)"
+    }
+  },
+  "ingredients": [
+    {
+      "id": "methylparaben-ethylparaben",
+      "displayName": "Methylparaben / Ethylparaben",
+      "aliases": ["methylparaben", "ethylparaben"],
+      "casNumber": "99-76-3 / 120-47-8",
+      "category": "Preservative",
+      "regulatory": {
+        "EU_CosIng": "Permitted — up to 0.4% individually, 0.8% combined with other parabens (Annex V)",
+        "FDA": "No specific concentration limit; permitted if the finished product is shown to be safe",
+        "India_CDSCO_BIS": "Generally permitted as a preservative under BIS IS 4707 Part 2",
+        "iarcGroup": null
+      },
+      "knownConcerns": "Considered the 'safer' short-chain parabens by EU's SCCS, distinct from the longer-chain propyl/butylparaben (see below).",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "propylparaben-butylparaben",
+      "displayName": "Propylparaben / Butylparaben",
+      "aliases": ["propylparaben", "butylparaben"],
+      "casNumber": "94-13-3 / 94-26-8",
+      "category": "Preservative",
+      "regulatory": {
+        "EU_CosIng": "Restricted (not banned) — capped at 0.14% (individually or combined) since Regulation (EU) No 1004/2014; banned specifically in leave-on nappy-area products for children under 3",
+        "FDA": "No specific concentration limit in the US",
+        "India_CDSCO_BIS": "Permitted preservative under BIS IS 4707 Part 2, subject to limits",
+        "iarcGroup": null
+      },
+      "knownConcerns": "EU's SCCS flagged potential endocrine (weak estrogen-mimicking) activity, which is why these two specifically (not all parabens) got a tighter EU cap in 2014 — useful nuance: 'paraben-free' marketing often overstates how broadly parabens are restricted.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU Regulation 1004/2014 (legislation.gov.uk mirror)", "url": "https://www.legislation.gov.uk/eur/2014/1004/data.html"}]
+    },
+    {
+      "id": "isopropylparaben-group",
+      "displayName": "Isopropylparaben / Isobutylparaben / Phenylparaben / Benzylparaben / Pentylparaben",
+      "aliases": ["isopropylparaben", "isobutylparaben", "phenylparaben", "benzylparaben", "pentylparaben"],
+      "casNumber": null,
+      "category": "Preservative",
+      "regulatory": {
+        "EU_CosIng": "BANNED — Commission Regulation (EU) No 358/2014, due to insufficient safety data (not proven unsafe, but not enough data to confirm safety)",
+        "FDA": "No specific US ban",
+        "India_CDSCO_BIS": "Not listed as a permitted preservative under BIS IS 4707 Part 2",
+        "iarcGroup": null
+      },
+      "knownConcerns": "Banned on a precautionary 'insufficient data' basis in the EU, not on confirmed-harm evidence — an important distinction your UI should probably preserve rather than flattening into a generic 'toxic' label.",
+      "flagBaseline": "red",
+      "sourceLinks": [{"body": "EU Regulation 358/2014 context", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "sls-sles",
+      "displayName": "Sodium Lauryl Sulfate (SLS) / Sodium Laureth Sulfate (SLES)",
+      "aliases": ["sodium lauryl sulfate", "sls", "sodium laureth sulfate", "sles", "sodium lauryl ether sulfate"],
+      "casNumber": "151-21-3 (SLS)",
+      "category": "Surfactant / Cleansing agent",
+      "regulatory": {
+        "EU_CosIng": "Permitted, no specific concentration cap; SLES manufacturing must control 1,4-dioxane (a processing byproduct) to low trace levels",
+        "FDA": "Permitted; FDA monitors 1,4-dioxane as a contaminant, not as an ingredient itself",
+        "India_CDSCO_BIS": "Permitted surfactant",
+        "iarcGroup": "1,4-dioxane (the manufacturing byproduct sometimes found in SLES, not SLS itself) is IARC Group 2B"
+      },
+      "knownConcerns": "SLS is a known skin/eye irritant at higher concentrations, especially in leave-on products — well-documented sensitivity issue, not a carcinogenicity issue. The 1,4-dioxane concern applies to manufacturing residue in SLES, not to SLS or SLES as molecules themselves.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "formaldehyde-releasers",
+      "displayName": "Formaldehyde-releasing preservatives (DMDM Hydantoin, Quaternium-15, Imidazolidinyl Urea)",
+      "aliases": ["dmdm hydantoin", "quaternium-15", "imidazolidinyl urea", "diazolidinyl urea"],
+      "casNumber": null,
+      "category": "Preservative",
+      "regulatory": {
+        "EU_CosIng": "Permitted with concentration limits and a mandatory 'contains formaldehyde' warning label if free formaldehyde exceeds 0.05%",
+        "FDA": "Permitted; no mandatory warning label requirement comparable to the EU's",
+        "India_CDSCO_BIS": "Status varies by specific compound under BIS IS 4707 Part 2 — check the individual substance",
+        "iarcGroup": "Formaldehyde itself is IARC Group 1 ('carcinogenic to humans') — relevant for inhalation exposure (e.g. occupational), the EU's labelling rule for cosmetics is a precaution based on this hazard classification, not a finding that approved cosmetic use levels cause cancer"
+      },
+      "knownConcerns": "The IARC Group 1 classification for formaldehyde is real and serious, but it's the basis for occupational exposure limits — EU's cosmetics response is a labelling requirement, not a ban, because the trace levels released in approved cosmetic formulations are far below occupational exposure levels.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "phthalates",
+      "displayName": "Phthalates (in synthetic fragrance, e.g. DEP, DBP, DEHP)",
+      "aliases": ["phthalate", "diethyl phthalate", "dep", "dbp", "dehp", "dibutyl phthalate"],
+      "casNumber": "84-66-2 (DEP)",
+      "category": "Fragrance solvent / plasticizer",
+      "regulatory": {
+        "EU_CosIng": "DBP, DEHP, and several other phthalates are BANNED as CMR (carcinogenic/mutagenic/reprotoxic) substances under Annex II; DEP is not on the banned list but is restricted in some other product categories",
+        "FDA": "No specific cosmetic ban; FDA monitors but has not prohibited phthalates in cosmetics",
+        "India_CDSCO_BIS": "Not separately listed as permitted in BIS cosmetic standards",
+        "iarcGroup": null
+      },
+      "knownConcerns": "Phthalates are rarely listed explicitly on labels — they typically hide inside the general term 'Fragrance' or 'Parfum', which is itself a known transparency gap in cosmetic labelling (a good thing for your app to flag explicitly when it sees 'Fragrance/Parfum' with no further disclosure).",
+      "flagBaseline": "red",
+      "sourceLinks": [{"body": "EU CosIng Annex II", "url": "https://ec.europa.eu/growth/tools-databases/cosing/reference/annexes/list/II"}]
+    },
+    {
+      "id": "triclosan",
+      "displayName": "Triclosan",
+      "aliases": ["triclosan"],
+      "casNumber": "3380-34-5",
+      "category": "Antibacterial / Preservative",
+      "regulatory": {
+        "EU_CosIng": "Permitted only in specific rinse-off products (toothpaste, soaps, mouthwash) at capped concentrations (max 0.3%); banned in other product types",
+        "FDA": "Banned in 2016 from over-the-counter antibacterial hand/body washes specifically; still permitted in some other categories (e.g. some toothpaste, with a separate safety review)",
+        "India_CDSCO_BIS": "Permitted in some categories (e.g. soaps) under current rules — narrower restriction than the US OTC wash ban",
+        "iarcGroup": null
+      },
+      "knownConcerns": "Primary regulatory concern is antibiotic-resistance pressure from widespread antibacterial use, plus some endocrine-disruption research — this is why restrictions are framed by product category (rinse-off vs leave-on) rather than an outright global ban.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "hydroquinone",
+      "displayName": "Hydroquinone",
+      "aliases": ["hydroquinone"],
+      "casNumber": "123-31-9",
+      "category": "Skin-lightening agent",
+      "regulatory": {
+        "EU_CosIng": "BANNED in cosmetic products (Annex II) — available only as a prescription drug in the EU",
+        "FDA": "OTC hydroquinone products were proposed for removal by FDA (2020 review); prescription-strength formulations remain available under medical supervision",
+        "India_CDSCO_BIS": "Restricted as a cosmetic ingredient — high-concentration skin-lightening products are a known compliance/grey-market issue in the Indian market despite the restriction",
+        "iarcGroup": "Classified IARC Group 3 ('not classifiable as to carcinogenicity to humans') — the regulatory concern is mainly skin-related (ochronosis with long-term high-dose use), not cancer"
+      },
+      "knownConcerns": "One of the better real-world examples of 'banned in the EU, restricted-but-still-found in some Indian-market products' — good for your app's India-specific messaging.",
+      "flagBaseline": "red",
+      "sourceLinks": [{"body": "EU CosIng Annex II", "url": "https://ec.europa.eu/growth/tools-databases/cosing/reference/annexes/list/II"}]
+    },
+    {
+      "id": "talc",
+      "displayName": "Talc",
+      "aliases": ["talc", "talcum powder", "magnesium silicate"],
+      "casNumber": "14807-96-6",
+      "category": "Bulking agent / Absorbent",
+      "regulatory": {
+        "EU_CosIng": "Permitted, no specific ban; classified for general use",
+        "FDA": "Permitted; FDA does not require pre-market testing of cosmetic talc, but has issued guidance and tested for asbestos contamination given ongoing litigation concerns",
+        "India_CDSCO_BIS": "Permitted under BIS standards (talc-grade purity requirements apply)",
+        "iarcGroup": "Talc containing asbestos is IARC Group 1; asbestos-free talc is Group 3 (not classifiable) — the hazard is specifically about asbestos contamination, not talc itself"
+      },
+      "knownConcerns": "The widely-reported 'talc causes cancer' concern is almost always specifically about asbestos contamination in talc mining/processing, not pure talc as a molecule — a precise distinction your app should make rather than blanket-flagging all talc red.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "FDA talc guidance", "url": "https://www.fda.gov/cosmetics/cosmetic-ingredients/talc"}]
+    },
+    {
+      "id": "oxybenzone",
+      "displayName": "Oxybenzone (Benzophenone-3)",
+      "aliases": ["oxybenzone", "benzophenone-3", "bp-3"],
+      "casNumber": "131-57-7",
+      "category": "UV filter",
+      "regulatory": {
+        "EU_CosIng": "Permitted as a UV filter, capped at 6% in sunscreen (lower limits in some product types) under Annex VI",
+        "FDA": "Permitted; included in FDA's 2019 proposed sunscreen rule as needing more safety data, but not banned",
+        "India_CDSCO_BIS": "Permitted UV filter under BIS standards with concentration limits",
+        "iarcGroup": null
+      },
+      "knownConcerns": "Some jurisdictions (e.g. Hawaii, parts of the Pacific) have banned it specifically for coral-reef/environmental reasons, not human health — worth distinguishing environmental bans from human-safety bans in your messaging.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng Annex VI", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "phenoxyethanol",
+      "displayName": "Phenoxyethanol",
+      "aliases": ["phenoxyethanol"],
+      "casNumber": "122-99-6",
+      "category": "Preservative",
+      "regulatory": {
+        "EU_CosIng": "Permitted, capped at 1% (Annex V)",
+        "FDA": "Permitted; FDA issued a 2008 consumer warning specifically about nursing-pillow/teether products marketed with it, not a general ban",
+        "India_CDSCO_BIS": "Permitted preservative under BIS IS 4707 Part 2",
+        "iarcGroup": null
+      },
+      "knownConcerns": "One of the most common 'paraben alternative' preservatives; considered low-risk at the 1% cap, mild irritation reported at higher concentrations.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "fragrance-parfum",
+      "displayName": "Fragrance / Parfum (undisclosed blend)",
+      "aliases": ["fragrance", "parfum", "perfume"],
+      "casNumber": null,
+      "category": "Fragrance",
+      "regulatory": {
+        "EU_CosIng": "26 specific fragrance allergens must be individually disclosed above set thresholds (Annex III); the rest of the blend can remain an undisclosed trade secret under 'Parfum'",
+        "FDA": "No requirement to disclose individual fragrance components in the US ('fragrance' is an FDA-recognized trade-secret exemption)",
+        "India_CDSCO_BIS": "No general requirement to break out individual fragrance components",
+        "iarcGroup": null
+      },
+      "knownConcerns": "This is a genuine transparency gap, not a single 'ingredient' with a safety profile — it can legally contain dozens of undisclosed substances, some of which may be allergens or, per the phthalates entry above, plasticizers. Reasonable for your app to flag this as 'unknown composition' rather than score it like a defined chemical.",
+      "flagBaseline": "yellow",
+      "sourceLinks": [{"body": "EU CosIng Annex III", "url": "https://ec.europa.eu/growth/tools-databases/cosing/reference/annexes/list/III"}]
+    },
+    {
+      "id": "aluminum-compounds",
+      "displayName": "Aluminum Chlorohydrate / Aluminum Zirconium (antiperspirant actives)",
+      "aliases": ["aluminum chlorohydrate", "aluminium chlorohydrate", "aluminum zirconium", "aluminium zirconium"],
+      "casNumber": "12042-91-0",
+      "category": "Antiperspirant active",
+      "regulatory": {
+        "EU_CosIng": "Permitted with concentration limits under Annex III restrictions; aerosol/spray forms have additional particle-size restrictions",
+        "FDA": "Regulated as an OTC drug active ingredient (antiperspirants are OTC drugs in the US, not just cosmetics) under an FDA monograph",
+        "India_CDSCO_BIS": "Permitted with limits",
+        "iarcGroup": null
+      },
+      "knownConcerns": "The popular 'antiperspirants cause breast cancer' claim has been specifically reviewed by major cancer agencies (including the American Cancer Society and National Cancer Institute) and not supported by current evidence — worth representing that consensus rather than the popular claim.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    },
+    {
+      "id": "titanium-dioxide-cosmetic",
+      "displayName": "Titanium Dioxide (cosmetic/sunscreen use)",
+      "aliases": ["titanium dioxide"],
+      "casNumber": "13463-67-7",
+      "category": "UV filter / Colorant (cosmetic use)",
+      "regulatory": {
+        "EU_CosIng": "Permitted as a UV filter and colorant in cosmetics (this is a separate approval from the food-additive ban — see foodAdditives.json E171 for the food context); nano-form must be labelled '[nano]'",
+        "FDA": "Permitted as a UV filter/colorant; one of only two ingredients (with zinc oxide) FDA recognizes as GRASE for sunscreen use",
+        "India_CDSCO_BIS": "Permitted UV filter under BIS standards",
+        "iarcGroup": "Powder/inhalable form previously EU-classified as a suspected inhalation carcinogen; an EU Court ruling (Aug 2025) overturned that classification. Not relevant to topical cosmetic application, which involves negligible inhalation exposure"
+      },
+      "knownConcerns": "Important nuance for your app: titanium dioxide's EU food ban (2022) does NOT apply to its cosmetic/sunscreen use — these are two separate EU regulatory regimes (food additives vs. cosmetics), so the same ingredient name can have a completely different status depending on which product category it's in.",
+      "flagBaseline": "green",
+      "sourceLinks": [{"body": "EU CosIng", "url": "https://ec.europa.eu/growth/tools-databases/cosing/"}]
+    }
+  ]
+}
