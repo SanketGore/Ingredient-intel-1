@@ -20,7 +20,63 @@ STEP 2 — Analyze ingredients through the correct lens:
 - supplement: evaluate for bioavailability, interaction risks, dosage safety
 - medicine: evaluate for active compound safety, side effects, contraindications
 
-STEP 3 — Return ONLY a valid raw JSON object, no markdown, no backticks, no explanation.
+STEP 3 — Compute the three scores using the explicit rubric below. Do NOT guess round
+numbers. Start each sub-score at 100, apply every penalty and reward that matches an
+ingredient actually present, then clamp to the 0-100 range. The final integer must be
+the exact arithmetic result (e.g. 73, 61, 88) — never snapped to a multiple of 5 or 10.
+Two products in the same category with different ingredient lists must not land on the
+same score unless their penalties genuinely sum to the same value.
+
+Whenever a VERIFIED OFFICIAL DATA block is supplied (see bottom), use ITS regulatory
+facts — IARC group, JECFA ADI status, and EU/FDA/FSSAI/CDSCO ban or restriction status —
+as the inputs to the rubric. Only fall back to your own knowledge for ingredients absent
+from that block, and when you do, apply the same rubric but treat the classification as
+lower-confidence.
+
+--- SAFETY SCORE rubric (applies to ALL product types; start at 100) ---
+Penalties (subtract, per matching ingredient):
+- IARC Group 1 (carcinogenic to humans): -25
+- IARC Group 2A (probably carcinogenic): -15
+- IARC Group 2B (possibly carcinogenic): -8
+- Banned in the analyzed product's category by EU, FDA, FSSAI, or CDSCO/BIS: -20
+- Restricted / conditional approval / mandatory warning-label requirement: -7
+- Recognized allergen or sensitizer (sulfites, specific fragrance allergens, etc.): -5
+- Known intake-level concern flagged in official data (e.g. nitrites forming nitrosamines): -5
+Rewards (add, per matching ingredient, capped so total rewards never exceed +12):
+- JECFA "ADI not specified" (no safety concern at normal use) or FDA GRAS: +2
+- Naturally occurring nutrient also used as the additive (e.g. ascorbic acid): +2
+
+--- PROCESSING SCORE rubric ---
+For FOOD / BEVERAGE (start at 100), penalties per matching ingredient:
+- Artificial / synthetic colour: -10
+- Synthetic preservative: -6
+- Artificial sweetener: -8
+- Flavour enhancer (MSG, disodium inosinate/guanylate): -5
+- Partially hydrogenated oil / industrial trans-fat source: -15
+- Synthetic emulsifier / stabilizer / thickener: -3
+- Added refined sugar or HFCS appearing among the first 3 ingredients: -6
+Rewards (add, capped at +10 total):
+- Whole-food or minimally-processed natural ingredient: +2 each
+For COSMETIC (start at 100), reframe "processing" as formulation harshness, penalties:
+- Sulfate surfactant (SLS/SLES): -8
+- Formaldehyde-releasing preservative: -8
+- Restricted paraben (propyl/butyl) or banned paraben: -8
+- Undisclosed "Fragrance/Parfum" blend: -6
+- Comedogenic agent (for leave-on products): -5
+Rewards (capped at +10): gentle/naturally-derived ingredient (glycerin, panthenol, etc.): +2 each
+For SUPPLEMENT / MEDICINE: base processing score on excipient/additive load using the
+food penalties above for any fillers, colours, or preservatives present.
+
+--- OVERALL SCORE ---
+overallScore = round( 0.40 * safetyScore + 0.40 * processingScore + 0.20 * nutritionQuality )
+where nutritionQuality is a 0-100 judgement of the product's nutritional value
+(food/beverage: sugar, sodium, fibre, whole-food density; cosmetic: substitute a
+0-100 "formulation quality" estimate based on beneficial vs. filler ingredients;
+supplement/medicine: base it on the active-compound value vs. excipient burden).
+Map processingLevel to the processingScore band: 80-100 = "Minimally Processed",
+60-79 = "Moderately Processed", 35-59 = "Highly Processed", 0-34 = "Ultra-Processed".
+
+STEP 4 — Return ONLY a valid raw JSON object, no markdown, no backticks, no explanation.
 
 Return this exact structure:
 {
@@ -56,8 +112,9 @@ Return this exact structure:
   "recommendations": [<list of actionable recommendations>],
   "alternatives": [
     {
-      "name": <product name or category e.g. "Organic Rolled Oats", "CeraVe Moisturising Cream">,
-      "reason": <why this is a better alternative>,
+      "name": <specific product name purchasable in India, e.g. "Paper Boat Aam Panna", "Plum Green Tea Toner", "Yogabar Multigrain Energy Bar">,
+      "reason": <why it is better — MUST name the specific flagged ingredient(s) from the analyzed product that this alternative avoids or replaces>,
+      "avoids": [<array of the flagged ingredient names this alternative does not contain>],
       "type": "brand" | "category"
     }
   ],
@@ -84,7 +141,13 @@ For KPIs:
 - cosmetic: include Skin Irritation Risk, Comedogenic Risk, Fragrance Sensitivity, Paraben Free, Sulfate Free, Heavy Metal Risk, Allergen Risk
 - supplement/medicine: include Allergen Risk, Additive Load, Preservative Level, and relevant clinical KPIs
 
-For alternatives: suggest 2-3 specific well-known cleaner products or product categories. Only suggest alternatives if overallScore < 70.
+For alternatives (only populate this array if overallScore < 70; otherwise return an empty array):
+- Suggest 3 to 5 SPECIFIC, NAMED products that a shopper can actually buy in India — real brands/products, not generic descriptions like "a healthier drink" or lazy fallbacks like "water".
+- Every alternative MUST be in the SAME product category as the analyzed item (analyzing a cola -> suggest other soft drinks or better-for-you sodas, not juice or water; analyzing a face wash -> suggest other face washes).
+- In each "reason", explicitly name which flagged ingredient(s) from the analyzed product the alternative avoids, and list those same ingredient names in the "avoids" array.
+- Do NOT suggest any alternative that itself contains the same red-flagged ingredient you flagged in the original product.
+- RANK the array from most-recommended (index 0) to least-recommended, based on each alternative's own ingredient profile — cleaner formulation ranks higher — NOT on brand popularity.
+- Set "type" to "brand" for a specific named product, "category" only if no specific safe branded product fits.
 
 Return only raw JSON.`;
 
