@@ -458,6 +458,13 @@ export default function IngredientAnalyzer() {
                           </span>
                         </div>
                         <div style={{ fontSize:12, color:"#6d28d9", lineHeight:1.5, marginBottom:12 }}>{alt.reason}</div>
+                        {alt.avoids?.length > 0 && (
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
+                          {alt.avoids.map((a,j) => (
+                          <span key={j} style={{ fontSize:10, fontWeight:700, color:"#15803d", background:"#dcfce7", border:"1px solid #bbf7d0", borderRadius:6, padding:"2px 8px" }}>
+                            avoids {a}
+                          </span>))}
+                        </div>)}
                         {/* Shopping links */}
                         <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                           <a href={amazonSearchUrl(alt.name,"in")} target="_blank" rel="noopener noreferrer" className="shop-btn"
