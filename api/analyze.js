@@ -151,6 +151,56 @@ For alternatives (only populate this array if overallScore < 70; otherwise retur
 
 Return only raw JSON.`;
 
+// Groq retired the free Llama models on 2026-08-16. Models are tried in order;
+// if one is decommissioned or unavailable, the next is used. Override the first
+// choice with the GROQ_MODEL environment variable in Vercel if needed.
+const MODELS = [
+  process.env.GROQ_MODEL,
+  "openai/gpt-oss-20b",
+  "openai/gpt-oss-120b",
+  "qwen/qwen3.6-27b"
+].filter(Boolean);
+
+async function callGroq(apiKey, messages) {
+  let lastError;
+  for (const model of MODELS) {
+    const body = {
+      model,
+      messages,
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+      max_completion_tokens: 6000
+    };
+    // gpt-oss models think before answering; keep that short so the JSON fits.
+    if (model.startsWith("openai/gpt-oss")) body.reasoning_effort = "low";
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.ok && !data.error) return { data, model };
+
+    lastError = new Error(data.error?.message || `Groq returned status ${response.status}`);
+    const code = `${data.error?.code || ""} ${data.error?.message || ""}`.toLowerCase();
+    const modelProblem = response.status === 404 ||
+      /decommission|deprecat|not found|does not exist|model_not_found|not available|no access/.test(code);
+    if (!modelProblem) throw lastError; // e.g. bad key or rate limit: don't hide it
+    console.warn(`Model ${model} unavailable, trying next:`, lastError.message);
+  }
+  throw lastError;
+}
+
+function parseModelJson(raw) {
+  const clean = (raw || "{}").replace(/```json|```/g, "").trim();
+  try { return JSON.parse(clean); } catch (_) {
+    const start = clean.indexOf("{"), end = clean.lastIndexOf("}");
+    if (start !== -1 && end > start) return JSON.parse(clean.slice(start, end + 1));
+    throw new Error("The model did not return valid JSON. Please try again.");
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -175,36 +225,16 @@ module.exports = async function handler(req, res) {
   const groundingBlock = formatGroundingPromptBlock(grounding.matches);
 
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Analyze these ingredients:\n\n${text}\n\n${groundingBlock}`
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.2,
-        max_tokens: 3000
-      })
-    });
+    const { data, model } = await callGroq(apiKey, [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `Analyze these ingredients:\n\n${text}\n\n${groundingBlock}`
+        }
+      ]);
 
-    const data = await response.json();
-    if (!response.ok || data.error) {
-      throw new Error(data.error?.message || `Groq returned status ${response.status}`);
-    }
-
-    const raw    = data.choices?.[0]?.message?.content || "{}";
-    const clean  = raw.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(clean);
-    parsed._modelUsed = "llama-3.1-8b-instant (Groq)";
+    const parsed = parseModelJson(data.choices?.[0]?.message?.content);
+    parsed._modelUsed = `${model} (Groq)`;
 
     // Deterministic safety net: regardless of whether the model followed the
     // instruction above, re-attach the verified regulatory record by matching the
