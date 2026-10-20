@@ -1,4 +1,8 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
+import { loadProfile, saveProfile, evaluateProfile } from "./profile.js";
+import { ProfileEditor, ProfileMatch } from "./ProfileUI.jsx";
+import { loadCompare, saveCompare, MAX_COMPARE } from "./compare.js";
+import { AddToCompare, CompareTray, CompareView } from "./CompareUI.jsx";
 import { createWorker } from "tesseract.js";
 
 const SUPPORTED_LANGUAGES = [
@@ -19,6 +23,27 @@ const SUPPORTED_LANGUAGES = [
 const amazonSearchUrl = (productName, region = "in") =>
   `https://www.amazon.${region}/s?k=${encodeURIComponent(productName)}&tag=ingredientintel`;
 
+// ── Local analysis cache: the same label analysed again on this device is free ──
+const CACHE_KEY = "ii.cache.v1";
+const CACHE_MAX = 15;
+const cacheKey = (text) => {
+  const t = String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  let h = 5381;
+  for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
+  return `a${(h >>> 0).toString(36)}${t.length}`;
+};
+const readCache = (key) => {
+  try { const all = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); return all[key]?.result || null; } catch (_) { return null; }
+};
+const writeCache = (key, result) => {
+  try {
+    const all = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    all[key] = { result, at: Date.now() };
+    const keep = Object.entries(all).sort((a, b) => b[1].at - a[1].at).slice(0, CACHE_MAX);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(Object.fromEntries(keep)));
+  } catch (_) { /* storage full or blocked: skip caching */ }
+};
+
 export default function IngredientAnalyzer() {
   const [input, setInput]               = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -33,6 +58,32 @@ export default function IngredientAnalyzer() {
   const [dragOver, setDragOver]         = useState(false);
   const fileRef = useRef();
   const [exporting, setExporting]       = useState(false);
+  const [profile, setProfile]           = useState(loadProfile);
+  const [showProfile, setShowProfile]   = useState(false);
+  const [compareItems, setCompareItems] = useState(loadCompare);
+  const [showCompare, setShowCompare]   = useState(false);
+  const [resultKey, setResultKey]       = useState("");
+
+  const profileEval = useMemo(() => evaluateProfile(result, profile), [result, profile]);
+  const inCompare = compareItems.some((c) => c.id === resultKey);
+
+  const updateProfile = (p) => { setProfile(p); saveProfile(p); setShowProfile(false); };
+  const updateCompare = (list) => { setCompareItems(list); saveCompare(list); };
+  const addToCompare = (name) => {
+    if (!result || inCompare || compareItems.length >= MAX_COMPARE) return;
+    const label = name || `Product ${compareItems.length + 1}`;
+    updateCompare([...compareItems, { id: resultKey, name: label, addedAt: Date.now(), result }]);
+  };
+  const downloadComparison = async (rows, winner) => {
+    try {
+      const { exportComparisonPdf } = await import("./exportPdf.js");
+      exportComparisonPdf(rows, winner);
+    } catch (err) {
+      setError("Couldn't create the PDF. Please try again.");
+    }
+  };
+  const openCompare = () => { setShowCompare(true); setShowProfile(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const openProfile = () => { setShowProfile(true); setShowCompare(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   // Loaded only when needed so the PDF library doesn't slow the first page load.
   const downloadPdf = async () => {
@@ -40,7 +91,7 @@ export default function IngredientAnalyzer() {
     setExporting(true);
     try {
       const { exportReportPdf } = await import("./exportPdf.js");
-      exportReportPdf(result, input);
+      exportReportPdf(result, input, profileEval);
     } catch (err) {
       setError("Couldn't create the PDF. Please try again.");
     } finally {
@@ -101,6 +152,13 @@ export default function IngredientAnalyzer() {
   const analyze = async () => {
     if (!input.trim()) { setError("Please enter or extract an ingredient list first."); return; }
     setLoading(true); setError(""); setResult(null);
+    const key = cacheKey(input);
+    const cached = readCache(key);
+    if (cached) {
+      // Same label analysed before on this device: reuse it instead of another API call.
+      setResult(cached); setResultKey(key); setActiveTab("overview"); setLoading(false);
+      return;
+    }
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
@@ -110,6 +168,8 @@ export default function IngredientAnalyzer() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Analysis failed");
       setResult(data);
+      setResultKey(key);
+      writeCache(key, data);
       setActiveTab("overview");
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -194,9 +254,28 @@ export default function IngredientAnalyzer() {
         </div>
         <h1 style={{ fontFamily:"'Instrument Serif',serif", fontSize:36, fontWeight:400, color:"#fff", margin:0, lineHeight:1.1 }}>Ingredient Intel</h1>
         <p style={{ color:"#64748b", fontSize:13, marginTop:8, marginBottom:0, fontWeight:500 }}>Decode what's really in your food, drinks & cosmetics</p>
+        <div style={{ display:"flex", justifyContent:"center", gap:8, marginTop:14, flexWrap:"wrap" }}>
+          <button onClick={openProfile} style={{ minHeight:40, padding:"8px 16px", borderRadius:999, border:"1px solid rgba(148,197,255,0.35)", background:"rgba(255,255,255,0.06)", color:"#e2e8f0", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+            {profile.selected.length ? `My profile · ${profile.selected.length} set` : "Set up my profile"}
+          </button>
+          {compareItems.length > 0 && (
+            <button onClick={openCompare} style={{ minHeight:40, padding:"8px 16px", borderRadius:999, border:"1px solid rgba(148,197,255,0.35)", background:"rgba(255,255,255,0.06)", color:"#e2e8f0", fontSize:13, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>
+              Compare ({compareItems.length})
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ maxWidth:620, margin:"0 auto", padding:"20px 16px 40px" }}>
+
+        {showProfile && <ProfileEditor profile={profile} onSave={updateProfile} onClose={() => setShowProfile(false)} />}
+        {showCompare && (
+          <CompareView items={compareItems} profile={profile}
+            onRemove={(id) => updateCompare(compareItems.filter((c) => c.id !== id))}
+            onClear={() => { updateCompare([]); setShowCompare(false); }}
+            onClose={() => setShowCompare(false)}
+            onDownload={downloadComparison} />
+        )}
 
         {/* Input Card */}
         <div style={{ background:"#fff", borderRadius:18, padding:20, boxShadow:"0 1px 4px rgba(0,0,0,0.07)", border:"1px solid #e2e8f0", marginBottom:14 }}>
@@ -295,7 +374,8 @@ export default function IngredientAnalyzer() {
           <div style={{ animation:"fadeUp 0.4s ease" }}>
 
             {/* Export */}
-            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:10 }}>
+            <div style={{ display:"flex", justifyContent:"flex-end", flexWrap:"wrap", gap:8, marginBottom:10 }}>
+              <AddToCompare inList={inCompare} full={compareItems.length >= MAX_COMPARE} count={compareItems.length} onAdd={addToCompare} onOpen={openCompare} />
               <button onClick={downloadPdf} disabled={exporting} style={{ display:"flex", alignItems:"center", gap:6, minHeight:40, padding:"8px 14px", borderRadius:10, border:"1.5px solid #bfdbfe", background:"#eff6ff", color:"#1d4ed8", fontSize:13, fontWeight:700, cursor:exporting?"wait":"pointer", fontFamily:"inherit" }}>
                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
                 {exporting ? "Preparing PDF..." : "Download PDF report"}
@@ -310,6 +390,9 @@ export default function IngredientAnalyzer() {
                 <div style={{ fontSize:12, color:"#475569", marginTop:2 }}>{result.analysisContext}</div>
               </div>
             </div>
+
+            {/* Personal profile match */}
+            <ProfileMatch evaluation={profileEval} onEdit={openProfile} />
 
             {/* Grounding Summary — how many ingredients are backed by official regulatory data */}
             {result.groundingSummary && (
@@ -512,10 +595,12 @@ export default function IngredientAnalyzer() {
             </div>
 
             <div style={{ textAlign:"center", fontSize:11, color:"#94a3b8", marginTop:14, lineHeight:1.6 }}>
-              Analysis by open models via Groq · Shopping links open search results · For clinical decisions, consult a qualified professional.
+              Analysis by open models via Groq · Additive data: EFSA via <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener noreferrer" style={{ color:"#64748b" }}>Open Food Facts</a> (ODbL) · Shopping links open search results · For clinical decisions, consult a qualified professional.
             </div>
           </div>
         )}
+
+        {!showCompare && <CompareTray count={compareItems.length} onOpen={openCompare} />}
       </div>
     </div>
   );
