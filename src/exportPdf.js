@@ -29,7 +29,7 @@ const cleanOr = (v, fallback = "(name in a non-Latin script)") => clean(v) || (v
 const suitText = (v) => (v === true ? "Yes" : v === false ? "No" : "Unknown");
 const label = (key) => key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()).trim();
 
-export function exportReportPdf(result, ingredientText = "") {
+export function exportReportPdf(result, ingredientText = "", profileEval = null) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -126,6 +126,30 @@ export function exportReportPdf(result, ingredientText = "") {
     y = doc.lastAutoTable.finalY + 12;
   }
 
+  // ── Personal profile ──
+  if (profileEval && profileEval.selected && profileEval.selected.length) {
+    heading("Your profile");
+    const avoid = profileEval.conflicts.filter((c) => c.level === "avoid").length;
+    const caution = profileEval.conflicts.length - avoid;
+    paragraph(avoid ? "Not a match for your profile" : caution ? "Check before you buy" : "Fits your profile",
+      { size: 11, bold: true, color: avoid ? FLAG_COLORS.red : caution ? FLAG_COLORS.yellow : FLAG_COLORS.green });
+    if (profileEval.conflicts.length) {
+      autoTable(doc, {
+        startY: y, margin: { left: M, right: M },
+        head: [["", "Ingredient", "Why"]],
+        body: profileEval.conflicts.map((c) => [c.level === "avoid" ? "AVOID" : "CAUTION", cleanOr(c.ingredient), clean(c.reason)]),
+        theme: "grid",
+        styles: { fontSize: 9, textColor: INK, lineColor: LINE, cellPadding: 5 },
+        headStyles: { fillColor: [241, 245, 249], textColor: MUTED, fontStyle: "bold" },
+        columnStyles: { 0: { cellWidth: 60, fontStyle: "bold" }, 1: { cellWidth: 150 } },
+        didParseCell: (d) => {
+          if (d.section === "body" && d.column.index === 0) d.cell.styles.textColor = d.cell.raw === "AVOID" ? FLAG_COLORS.red : FLAG_COLORS.yellow;
+        },
+      });
+      y = doc.lastAutoTable.finalY + 12;
+    }
+  }
+
   // ── KPIs ──
   if (result.kpis?.length) {
     heading("Key indicators");
@@ -217,4 +241,60 @@ export function exportReportPdf(result, ingredientText = "") {
 
   const stamp = new Date().toISOString().slice(0, 10);
   doc.save(`ingredient-intel-report-${stamp}.pdf`);
+}
+
+// Side-by-side comparison of up to 3 products (rows come from compare.js summarize()).
+export function exportComparisonPdf(rows, winner) {
+  const doc = new jsPDF({ unit: "pt", format: "a4", orientation: rows.length > 2 ? "landscape" : "portrait" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const M = 44;
+  doc.setFillColor(...BLUE).rect(0, 0, pageW, 6, "F");
+  doc.setFont("helvetica", "bold").setFontSize(20).setTextColor(...INK);
+  doc.text("Ingredient Intel Comparison", M, M + 14);
+  doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(...MUTED);
+  doc.text(clean(`Generated ${new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`), M, M + 30);
+  let y = M + 50;
+  if (winner) {
+    const line = winner.tie ? "These products come out even. Compare the red-flag ingredients to decide."
+      : `Better choice: ${winner.best.name}${winner.reasons.length ? " - " + winner.reasons.join(", ") : ""}.`;
+    doc.setFont("helvetica", "bold").setFontSize(11).setTextColor(...(winner.tie ? INK : FLAG_COLORS.green));
+    const lines = doc.splitTextToSize(clean(line), pageW - M * 2);
+    doc.text(lines, M, y);
+    y += lines.length * 15 + 8;
+  }
+  const yn = (v) => (v === true ? "Yes" : v === false ? "No" : "Unknown");
+  const profileCell = (r) => !r.profileSet ? "No profile set"
+    : r.avoid.length ? `Avoid: ${[...new Set(r.avoid.map((c) => c.ingredient))].join(", ")}`
+    : r.caution.length ? `Check: ${[...new Set(r.caution.map((c) => c.ingredient))].join(", ")}` : "Fits";
+  const body = [
+    ["Overall score", ...rows.map((r) => `${r.overall ?? "-"} / 100`)],
+    ["Safety score", ...rows.map((r) => `${r.safety ?? "-"} / 100`)],
+    ["Natural score", ...rows.map((r) => `${r.natural ?? "-"} / 100`)],
+    ["Processing", ...rows.map((r) => r.processingLevel || "-")],
+    ["Red flags", ...rows.map((r) => r.red.join(", ") || "None")],
+    ["Moderate", ...rows.map((r) => r.yellow.join(", ") || "None")],
+    ["Your profile", ...rows.map(profileCell)],
+    ["Vegetarian", ...rows.map((r) => yn(r.suitableFor.vegetarian))],
+    ["Vegan", ...rows.map((r) => yn(r.suitableFor.vegan))],
+    ["Gluten free", ...rows.map((r) => yn(r.suitableFor.glutenFree))],
+    ["Diabetic", ...rows.map((r) => yn(r.suitableFor.diabetic))],
+    ["Verdict", ...rows.map((r) => r.verdict || "")],
+  ].map((row) => row.map(cleanOr));
+  const bestIdx = winner && !winner.tie ? rows.findIndex((r) => r.id === winner.best.id) : -1;
+  autoTable(doc, {
+    startY: y, margin: { left: M, right: M },
+    head: [["", ...rows.map((r, i) => cleanOr(`${i === bestIdx ? "* " : ""}${r.name}`))]],
+    body,
+    theme: "grid",
+    styles: { fontSize: 9, textColor: INK, lineColor: LINE, cellPadding: 6, valign: "top" },
+    headStyles: { fillColor: [241, 245, 249], textColor: INK, fontStyle: "bold", fontSize: 10 },
+    columnStyles: { 0: { cellWidth: 90, fontStyle: "bold", textColor: MUTED } },
+    didParseCell: (d) => {
+      if (d.column.index === bestIdx + 1 && bestIdx >= 0) d.cell.styles.fillColor = [240, 253, 244];
+    },
+  });
+  doc.setFont("helvetica", "normal").setFontSize(8).setTextColor(148, 163, 184);
+  doc.text("Ingredient Intel  |  * = better choice  |  Not medical advice; consult a qualified professional for clinical decisions.", M, pageH - 24);
+  doc.save(`ingredient-intel-comparison-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
