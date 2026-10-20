@@ -32,6 +32,21 @@ export default function IngredientAnalyzer() {
   const [activeTab, setActiveTab]       = useState("overview");
   const [dragOver, setDragOver]         = useState(false);
   const fileRef = useRef();
+  const [exporting, setExporting]       = useState(false);
+
+  // Loaded only when needed so the PDF library doesn't slow the first page load.
+  const downloadPdf = async () => {
+    if (!result) return;
+    setExporting(true);
+    try {
+      const { exportReportPdf } = await import("./exportPdf.js");
+      exportReportPdf(result, input);
+    } catch (err) {
+      setError("Couldn't create the PDF. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // ── OCR ────────────────────────────────────────────────────────────────────
   const extractTextFromImage = async (file, lang = ocrLang) => {
@@ -278,6 +293,14 @@ export default function IngredientAnalyzer() {
         {/* Results */}
         {result && (
           <div style={{ animation:"fadeUp 0.4s ease" }}>
+
+            {/* Export */}
+            <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:10 }}>
+              <button onClick={downloadPdf} disabled={exporting} style={{ display:"flex", alignItems:"center", gap:6, minHeight:40, padding:"8px 14px", borderRadius:10, border:"1.5px solid #bfdbfe", background:"#eff6ff", color:"#1d4ed8", fontSize:13, fontWeight:700, cursor:exporting?"wait":"pointer", fontFamily:"inherit" }}>
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+                {exporting ? "Preparing PDF..." : "Download PDF report"}
+              </button>
+            </div>
 
             {/* Context Banner */}
             <div style={{ background:contextBg(result.productType), border:`1px solid ${contextBorder(result.productType)}`, borderRadius:12, padding:"10px 14px", marginBottom:12, display:"flex", alignItems:"center", gap:10 }}>
