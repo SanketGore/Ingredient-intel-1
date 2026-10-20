@@ -247,7 +247,7 @@ module.exports = async function handler(req, res) {
     parsed.groundingSummary = {
       verifiedCount,
       totalCount: (parsed.ingredients || []).length,
-      sources: ["JECFA (WHO/FAO)", "EFSA/EU", "US FDA", "FSSAI India", "EU CosIng/SCCS", "India CDSCO/BIS", "IARC (WHO)"],
+      sources: ["JECFA (WHO/FAO)", "EFSA/EU", "Open Food Facts (EFSA data, ODbL)", "US FDA", "FSSAI India", "EU CosIng/SCCS", "India CDSCO/BIS", "IARC (WHO)"],
       note: "verifiedCount reflects ingredients matched against the curated official-source database in api/data/. Unmatched ingredients are still analyzed by the model but are AI-assessed, not regulator-verified — see officialSource per ingredient."
     };
 
