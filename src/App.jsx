@@ -175,7 +175,7 @@ export default function IngredientAnalyzer() {
       <div style={{ background:"linear-gradient(135deg,#0f172a 0%,#1a3050 50%,#0f172a 100%)", padding:"32px 24px 28px", textAlign:"center" }}>
         <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:"rgba(99,179,237,0.12)", border:"1px solid rgba(99,179,237,0.2)", borderRadius:20, padding:"4px 12px", marginBottom:14 }}>
           <span style={{ width:7, height:7, borderRadius:"50%", background:"#34d399", display:"inline-block", animation:"pulse 2s infinite" }} />
-          <span style={{ fontSize:11, fontWeight:700, letterSpacing:"0.18em", color:"#7dd3fc", textTransform:"uppercase" }}>Llama 3.1 · Groq Cloud</span>
+          <span style={{ fontSize:11, fontWeight:700, letterSpacing:"0.18em", color:"#7dd3fc", textTransform:"uppercase" }}>GPT-OSS · Groq Cloud</span>
         </div>
         <h1 style={{ fontFamily:"'Instrument Serif',serif", fontSize:36, fontWeight:400, color:"#fff", margin:0, lineHeight:1.1 }}>Ingredient Intel</h1>
         <p style={{ color:"#64748b", fontSize:13, marginTop:8, marginBottom:0, fontWeight:500 }}>Decode what's really in your food, drinks & cosmetics</p>
@@ -489,7 +489,7 @@ export default function IngredientAnalyzer() {
             </div>
 
             <div style={{ textAlign:"center", fontSize:11, color:"#94a3b8", marginTop:14, lineHeight:1.6 }}>
-              Analysis by Llama 3.1 8B via Groq · Shopping links open search results · For clinical decisions, consult a qualified professional.
+              Analysis by open models via Groq · Shopping links open search results · For clinical decisions, consult a qualified professional.
             </div>
           </div>
         )}
