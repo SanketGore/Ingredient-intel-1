@@ -11,6 +11,16 @@
 const foodAdditives = require("../data/foodAdditives.json");
 const cosmeticIngredients = require("../data/cosmeticIngredients.json");
 
+// Built by scripts/build-official-data.mjs from open data (EFSA evaluations via the
+// Open Food Facts additives taxonomy, plus optional IARC/FSSAI files). Optional: the
+// app still works on the curated files alone if this hasn't been generated.
+let generatedAdditives = { additives: [] };
+try {
+  generatedAdditives = require("../data/generated/additives.generated.json");
+} catch (_) {
+  /* not generated yet */
+}
+
 // ---- Normalization -----------------------------------------------------
 
 function normalize(str) {
@@ -65,6 +75,32 @@ function buildIndex() {
     });
   }
 
+  // Generated records come last so hand-curated entries always win. They are matched
+  // only by exact name or code (never by substring) to avoid false positives across
+  // 700+ entries, and are skipped where a curated record already covers the code.
+  const curatedCodes = new Set(records.flatMap((r) => [...r._codeSet]));
+  // Give curated records the open-data diet/class flags for the same code.
+  const genByCode = new Map();
+  for (const g of generatedAdditives.additives || []) {
+    const c = g.isVariant ? null : extractCodeNumbers(g.eNumber)[0];
+    if (c && !genByCode.has(c)) genByCode.set(c, g);
+  }
+  for (const r of records) {
+    const g = [...r._codeSet].map((c) => genByCode.get(c)).find(Boolean);
+    if (g) { r.diet = r.diet || g.diet; r.classes = r.classes || g.classes; }
+  }
+  for (const item of generatedAdditives.additives || []) {
+    const code = item.isVariant ? null : (extractCodeNumbers(item.eNumber)[0] || null);
+    if (code && curatedCodes.has(code)) continue;
+    records.push({
+      ...item,
+      _datasetSource: "Open data: EFSA evaluations via Open Food Facts" + (item.regulatory && item.regulatory.IARC ? " + IARC" : "") + (item.regulatory && item.regulatory.FSSAI ? " + FSSAI" : ""),
+      _exactOnly: true,
+      _aliasSet: new Set([item.displayName, ...(item.aliases || [])].map(normalize).filter(Boolean)),
+      _codeSet: new Set(code ? [code] : []),
+    });
+  }
+
   return records;
 }
 
@@ -93,14 +129,18 @@ function matchOne(ingredientText) {
     }
   }
 
-  // 2. Exact alias match
-  for (const rec of index) {
-    if (rec._aliasSet.has(norm)) return rec;
+  // 2. Exact alias match (also tolerating a plural/singular "s")
+  const variants = [norm, norm.endsWith("s") ? norm.slice(0, -1) : norm + "s"];
+  for (const v of variants) {
+    for (const rec of index) {
+      if (rec._aliasSet.has(v)) return rec;
+    }
   }
 
   // 3. Substring match in either direction (handles "Sodium Benzoate (Preservative)"
   //    or OCR text like "sodium benzoate e211 preservative")
   for (const rec of index) {
+    if (rec._exactOnly) continue;
     for (const alias of rec._aliasSet) {
       if (alias.length < 4) continue; // avoid noisy short-alias false positives
       if (norm.includes(alias) || alias.includes(norm)) return rec;
@@ -138,7 +178,9 @@ function buildGroundingContext(rawText) {
 }
 
 // Render the matched records into a compact block to inject into the LLM prompt.
-function formatGroundingPromptBlock(matches) {
+function formatGroundingPromptBlock(allMatches) {
+  // Records without an official evaluation only carry diet/class info, not regulatory facts.
+  const matches = allMatches.filter((m) => m.verified !== false);
   if (!matches.length) {
     return "VERIFIED OFFICIAL DATA: none of the listed ingredients matched our curated regulatory database. Treat all ingredients as AI-assessed from general knowledge and say so.";
   }
@@ -170,8 +212,16 @@ function attachGroundingToIngredients(ingredients) {
     if (!rec) {
       return { ...ing, officialSource: false, officialSourceDetails: null };
     }
+    // Open-data facts that personal profiles use (vegan/vegetarian/palm oil, class).
+    const dataFacts = rec.diet || rec.classes
+      ? { code: rec.eNumber || null, diet: rec.diet || null, classes: rec.classes || [] }
+      : null;
+    if (rec.verified === false) {
+      return { ...ing, officialSource: false, officialSourceDetails: null, dataFacts };
+    }
     return {
       ...ing,
+      dataFacts,
       officialSource: true,
       officialSourceDetails: {
         matchedName: rec.displayName,
