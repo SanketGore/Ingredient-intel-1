@@ -1,6 +1,6 @@
 {
  "_meta": {
-  "generatedAt": "2026-10-20T17:17:12.613Z",
+  "generatedAt": "2026-11-01T10:28:02.564Z",
   "generator": "scripts/build-official-data.mjs",
   "counts": {
    "total": 724,
@@ -20360,6 +20360,7 @@
     "stevia rebaudiana extract",
     "stevia leaf extract",
     "steviol",
+    "stevia",
     "e 960",
     "ins 960",
     "ins960"
